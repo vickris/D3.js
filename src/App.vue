@@ -60,7 +60,7 @@ export default {
       this.loading = true;
 
       axios
-        .get(`https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+created:>=2018-10-18`, {
+        .get(`https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=2018-11-12`, {
           params: {
             // q: `repo:${this.repository}+is:open+is:issue+created:>=2017-10-17`,
             // page: 1
@@ -153,7 +153,7 @@ export default {
     },
     getIssuesPerPage: function(page) {
       return axios.get(
-        `https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=2018-10-18`,
+        `https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=2018-11-12`,
         {
           params: {
             state: "all",
