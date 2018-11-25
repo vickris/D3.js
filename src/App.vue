@@ -18,7 +18,7 @@
         Error occured
       </div>
 
-      <div>
+      <div v-show="chart !== null">
         <svg />
       </div>
     </div>
@@ -83,11 +83,9 @@ export default {
           });
 
 
-          // if (this.chart != null) {
-          //   this.chart.destroy();
-          // }
-
-          var ctx = this.$refs.myChart;
+          if (this.chart != null) {
+            this.chart.remove();
+          }
 
           var issuesPastWeek = [];
           var issuesByDay = _.countBy(this.days)
@@ -103,9 +101,6 @@ export default {
                 sample.push({day: key, issues: value})
             });
 
-
-          console.log(sample)
-
           this.issuesPastWeek = issuesPastWeek,
           this.dates = dates
 
@@ -118,14 +113,16 @@ export default {
                 .attr("width", width)
                 .attr("height", height)
 
-          const chart = svg.append('g')
+          this.chart = svg.append('g')
           .attr('transform', `translate(${margin}, ${margin})`);
+
+
 
           const yScale = d3.scaleLinear()
           .range([height, 0])
           .domain([0, _.maxBy(sample, 'issues').issues]);
 
-          chart.append('g')
+          this.chart.append('g')
             .call(d3.axisLeft(yScale));
 
           const xScale = d3.scaleBand()
@@ -133,18 +130,18 @@ export default {
             .domain(sample.map((s) => s.day))
             .padding(0.2)
 
-          chart.append('g')
+          this.chart.append('g')
               .attr('transform', `translate(0, ${height})`)
               .call(d3.axisBottom(xScale));
 
-          chart.append('g')
+          this.chart.append('g')
             .attr('class', 'grid')
             .call(d3.axisLeft()
                 .scale(yScale)
                 .tickSize(-width, 0, 0)
                 .tickFormat(''))
 
-          const barGroups = chart.selectAll()
+          const barGroups = this.chart.selectAll()
             .data(sample)
             .enter()
             .append('g')
@@ -220,31 +217,6 @@ export default {
             .attr('text-anchor', 'middle')
             .text('Issues in the past 1 week')
 
-
-        //   this.chart = new Chart(ctx, {
-        //     type: "bar",
-        //     data: {
-        //       labels: this.dates,
-        //       datasets: [
-        //         {
-        //           label: "Number of issues",
-        //           backgroundColor: "rgba(54, 162, 235, 0.5)",
-        //           borderColor: "rgb(54, 162, 235)",
-        //           fill: false,
-        //           data: this.issuesPastWeek
-        //         }
-        //       ]
-        //     },
-        //     options: {
-        //         scales: {
-        //             yAxes: [{
-        //                 ticks: {
-        //                     beginAtZero: true
-        //                 }
-        //             }]
-        //         }
-        //     }
-        // })
         //   let last_page = response.headers.link
         //     .split(";")[1]
         //     .split("page=")[1]
