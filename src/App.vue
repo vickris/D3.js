@@ -2,7 +2,7 @@
   <div id="app">
     <form action="#" @submit.prevent="getIssues">
       <div class="form-group">
-        <input type="text" placeholder="Search Repo" v-model="repository" name="skill" class="col-md-4 col-md-offset-4">
+        <input type="text" placeholder="Search Repo" v-model="repository" name="skill" class="col-md-2 col-md-offset-5">
       </div>
     </form>
 
@@ -38,12 +38,8 @@ export default {
       repository: "",
       days: [],
       startDate: null,
-      issues: [],
-      issuesPastWeek: [],
-      dates: [],
       loading: false,
       errored: false,
-      page: 1
     };
   },
   methods: {
