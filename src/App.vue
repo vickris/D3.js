@@ -37,6 +37,7 @@ export default {
       chart: null,
       repository: "",
       days: [],
+      startDate: null,
       issues: [],
       issuesPastWeek: [],
       dates: [],
@@ -56,9 +57,10 @@ export default {
     },
     getIssues: function() {
       this.loading = true;
+      this.startDate = moment().subtract(6, 'days').format('YYYY-MM-DD');
 
       axios
-        .get(`https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=2018-11-18`, {
+        .get(`https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=${this.startDate}`, {
           params: {
             per_page: 100
           },
@@ -93,10 +95,6 @@ export default {
             return moment(issue.created_at).format("MMM Do YY");
           });
 
-          if (this.chart != null) {
-            this.chart.remove();
-          }
-
           var issuesPastWeek = {};
           var issuesByDay = _.countBy(this.days)
           var dates = this.getDates(moment().subtract(6, 'days'), moment())
@@ -125,7 +123,7 @@ export default {
     },
     getIssuesPerPage: function(page) {
       return axios.get(
-        `https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=2018-11-18`,
+        `https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=${this.startDate}`,
         {
           params: {
             page: page,
@@ -139,6 +137,10 @@ export default {
       );
     },
     drawChart: function(issues) {
+      if (this.chart != null) {
+        this.chart.remove();
+      }
+
       const margin = 80;
       const width = 1000 - 2 * margin;
       const height = 600 - 2 * margin;
@@ -150,14 +152,14 @@ export default {
       this.chart = svg.append('g')
       .attr('transform', `translate(${margin}, ${margin})`);
 
-
-
       const yScale = d3.scaleLinear()
       .range([height, 0])
       .domain([0, _.maxBy(issues, 'issues').issues]);
 
       this.chart.append('g')
-        .call(d3.axisLeft(yScale));
+        .call(d3.axisLeft(yScale)
+        .ticks(_.maxBy(issues, 'issues').issues));
+
 
       const xScale = d3.scaleBand()
         .range([0, width])
@@ -168,17 +170,9 @@ export default {
           .attr('transform', `translate(0, ${height})`)
           .call(d3.axisBottom(xScale));
 
-      this.chart.append('g')
-        .attr('class', 'grid')
-        .call(d3.axisLeft()
-            .scale(yScale)
-            .tickSize(-width, 0, 0)
-            .tickFormat(''))
-
-      const barGroups = this.chart.selectAll()
+      const barGroups = this.chart.selectAll('rect')
         .data(issues)
         .enter()
-        .append('g')
 
       barGroups
         .append('rect')
@@ -195,15 +189,15 @@ export default {
             .attr('x', (a) => xScale(a.day) - 5)
             .attr('width', xScale.bandwidth() + 10)
 
-            const y = yScale(actual.issues)
-
-           line = chart.append('line')
-            .attr('id', 'limit')
-            .attr('x1', 0)
-            .attr('y1', y)
-            .attr('x2', width)
-            .attr('y2', y)
-
+            barGroups
+            .append('text')
+            .attr('class', 'value')
+            .attr('x', (a) => xScale(a.day) + xScale.bandwidth() / 2)
+            .attr('y', (a) => yScale(a.issues) - 20)
+            .attr('text-anchor', 'middle')
+            .text((a, idx) => {
+              return idx !== i ? '' : `${a.issues} issues`;
+            })
         })
         .on('mouseleave', function () {
           d3.selectAll('.issues')
@@ -216,17 +210,8 @@ export default {
             .attr('x', (a) => xScale(a.day))
             .attr('width', xScale.bandwidth())
 
-          this.chart.selectAll('#limit').remove()
-          this.chart.selectAll('.divergence').remove()
+          svg.selectAll('.value').remove()
         })
-
-      barGroups
-        .append('text')
-        .attr('class', 'value')
-        .attr('x', (a) => xScale(a.day) + xScale.bandwidth() / 2)
-        .attr('y', (a) => yScale(a.issues) + 30)
-        .attr('text-anchor', 'middle')
-        .text((a) => `${a.issues} issues`)
 
       svg
         .append('text')
@@ -266,7 +251,7 @@ export default {
 }
 
 svg {
-  width: 60%;
+  min-width: 60%;
   height: 100%;
 }
 </style>
