@@ -46,7 +46,7 @@ export default {
     };
   },
   methods: {
-    getDates: function(startDate, endDate) {
+    getDates(startDate, endDate) {
       var now = startDate.clone(), dates = [];
       while (now.isSameOrBefore(endDate)) {
           dates.push(now.format("MMM Do YY"));
@@ -54,7 +54,7 @@ export default {
       }
       return dates;
     },
-    getIssues: function() {
+    getIssues() {
       this.loading = true;
       this.startDate = moment().subtract(6, 'days').format('YYYY-MM-DD');
 
