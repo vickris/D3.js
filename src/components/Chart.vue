@@ -25,18 +25,20 @@ export default {
       }
 
       const margin = 80;
-      const width = 1000 - 2 * margin;
-      const height = 600 - 2 * margin;
+      const svg_width = 1000;
+      const svg_height = 600;
+      const chart_width = 1000 - 2 * margin;
+      const chart_height = 600 - 2 * margin;
 
       const svg = d3.select('svg')
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", svg_width)
+            .attr("height", svg_height)
 
       this.chart = svg.append('g')
       .attr('transform', `translate(${margin}, ${margin})`);
 
       const yScale = d3.scaleLinear()
-      .range([height, 0])
+      .range([chart_height, 0])
       .domain([0, _.maxBy(value, 'issues').issues]);
 
       this.chart.append('g')
@@ -45,12 +47,12 @@ export default {
 
 
       const xScale = d3.scaleBand()
-        .range([0, width])
+        .range([0, chart_width])
         .domain(value.map((s) => s.day))
         .padding(0.2)
 
       this.chart.append('g')
-          .attr('transform', `translate(0, ${height})`)
+          .attr('transform', `translate(0, ${chart_height})`)
           .call(d3.axisBottom(xScale));
 
       const barGroups = this.chart.selectAll('rect')
@@ -62,7 +64,7 @@ export default {
         .attr('class', 'bar')
         .attr('x', (g) => xScale(g.day))
         .attr('y', (g) => yScale(g.issues))
-        .attr('height', (g) => height - yScale(g.issues))
+        .attr('height', (g) => chart_height - yScale(g.issues))
         .attr('width', xScale.bandwidth())
         .on('mouseenter', function (actual, i) {
           d3.select(this)
@@ -99,7 +101,7 @@ export default {
       svg
         .append('text')
         .attr('class', 'label')
-        .attr('x', -(height / 2) - margin)
+        .attr('x', -(chart_height / 2) - margin)
         .attr('y', margin / 2.4)
         .attr('transform', 'rotate(-90)')
         .attr('text-anchor', 'middle')
@@ -107,14 +109,14 @@ export default {
 
       svg.append('text')
         .attr('class', 'label')
-        .attr('x', width / 2 + margin)
-        .attr('y', height + margin * 1.7)
+        .attr('x', chart_width / 2 + margin)
+        .attr('y', chart_height + margin * 1.7)
         .attr('text-anchor', 'middle')
         .text('Days')
 
       svg.append('text')
         .attr('class', 'title')
-        .attr('x', width / 2 + margin)
+        .attr('x', chart_width / 2 + margin)
         .attr('y', 40)
         .attr('text-anchor', 'middle')
         .text('Issues in the past 1 week')

@@ -111,4 +111,8 @@ svg {
   min-width: 60%;
   height: 100%;
 }
+
+.bar {
+  fill: #319bbe;
+}
 </style>
