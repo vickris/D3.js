@@ -6,12 +6,12 @@
       </div>
     </form>
 
-    <div class="my-5">
+    <div>
       <div class="alert alert-info" v-show="loading">
         Loading...
       </div>
       <div class="alert alert-danger" v-show="errored">
-        Error occured
+        An Error Occured
       </div>
 
       <chart :issues="issues"></chart>
@@ -20,81 +20,72 @@
 </template>
 
 <script>
-// import Chart from "chart.js";
-
-import moment from "moment";
-import _ from "lodash";
-import axios from "axios";
-import Chart from './components/Chart.vue'
-
+import moment from 'moment';
+import axios from 'axios';
+import Chart from './components/Chart.vue';
 
 export default {
-  name: "app",
+  name: 'app',
   components: {
     Chart
   },
   data() {
     return {
       issues: [],
-      repository: "",
-      days: [],
+      repository: '',
       startDate: null,
       loading: false,
-      errored: false,
+      errored: false
     };
   },
   methods: {
-    getDates(startDate, endDate) {
-      var now = startDate.clone(), dates = [];
-      while (now.isSameOrBefore(endDate)) {
-          dates.push(now.format("MMM Do YY"));
-          now.add(1, 'days');
+    getDateRange() {
+      const startDate = moment().subtract(6, 'days');
+      const endDate = moment();
+      const dates = [];
+
+      while (startDate.isSameOrBefore(endDate)) {
+        dates.push({
+          day: startDate.format('MMM Do YY'),
+          issues: 0
+        });
+
+        startDate.add(1, 'days');
       }
+
       return dates;
     },
+
     getIssues() {
       this.loading = true;
+      this.errored = false;
       this.startDate = moment().subtract(6, 'days').format('YYYY-MM-DD');
 
       axios
-        .get(`https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=${this.startDate}`, {
-          params: {
-            per_page: 100
-          }
-        })
+        .get(
+          `https://api.github.com/search/issues?q=repo:${this.repository}+is:issue+is:open+created:>=${this.startDate}`,
+          { params: { per_page: 100 } }
+        )
         .then(response => {
-          this.days = response.data.items.map(issue => {
-            return moment(issue.created_at).format("MMM Do YY");
+          const payload = this.getDateRange();
+
+          response.data.items.forEach(item => {
+            const key = moment(item.created_at).format('MMM Do YY');
+            const obj = payload.filter(o => o.day === key)[0];
+            obj.issues += 1;
           });
 
-          var issuesPastWeek = {};
-          var issuesByDay = _.countBy(this.days)
-          var dates = this.getDates(moment().subtract(6, 'days'), moment())
-
-          for (var i = 0; i < dates.length; i++) {
-            if(issuesByDay[dates[i]]) {
-              issuesPastWeek[dates[i]] = issuesByDay[dates[i]]
-              continue
-            }
-
-            issuesPastWeek[dates[i]] = 0
-          }
-
-          var issues = []
-          _.forOwn(issuesPastWeek, function(value, key) {
-                issues.push({day: key, issues: value})
-            });
-
-          this.issues = issues
+          this.issues = payload;
         })
         .catch(error => {
+          // eslint-disable-next-line
           console.error(error);
           this.errored = true;
         })
-        .finally(() => (this.loading = false));
+        .finally(() => this.loading = false);
     }
   }
-}
+};
 </script>
 
 <style>
