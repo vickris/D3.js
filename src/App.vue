@@ -13,9 +13,8 @@
       <div class="alert alert-danger" v-show="errored">
         An Error Occured
       </div>
-
-      <chart :issues="issues"></chart>
     </div>
+    <chart :issues="issues"></chart>
   </div>
 </template>
 
@@ -75,6 +74,7 @@ export default {
             obj.issues += 1;
           });
 
+          console.log(payload);
           this.issues = payload;
         })
         .catch(error => {
