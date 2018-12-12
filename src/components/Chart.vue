@@ -19,7 +19,7 @@ export default {
     }
   },
   watch: {
-    issues(value) {
+    issues(issues_val) {
       if (this.chart != null) {
         this.chart.remove();
       }
@@ -39,16 +39,16 @@ export default {
 
       const yScale = d3.scaleLinear()
       .range([chart_height, 0])
-      .domain([0, _.maxBy(value, 'issues').issues]);
+      .domain([0, _.maxBy(issues_val, 'issues').issues]);
 
       this.chart.append('g')
         .call(d3.axisLeft(yScale)
-        .ticks(_.maxBy(value, 'issues').issues));
+        .ticks(_.maxBy(issues_val, 'issues').issues));
 
 
       const xScale = d3.scaleBand()
         .range([0, chart_width])
-        .domain(value.map((s) => s.day))
+        .domain(issues_val.map((s) => s.day))
         .padding(0.2)
 
       this.chart.append('g')
@@ -56,7 +56,7 @@ export default {
           .call(d3.axisBottom(xScale));
 
       const barGroups = this.chart.selectAll('rect')
-        .data(value)
+        .data(issues_val)
         .enter()
 
       barGroups

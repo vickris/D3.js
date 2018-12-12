@@ -73,8 +73,6 @@ export default {
             const obj = payload.filter(o => o.day === key)[0];
             obj.issues += 1;
           });
-
-          console.log(payload);
           this.issues = payload;
         })
         .catch(error => {
@@ -103,7 +101,7 @@ svg {
   height: 100%;
 }
 
-.bar {
+/*.bar {
   fill: #319bbe;
-}
+}*/
 </style>
